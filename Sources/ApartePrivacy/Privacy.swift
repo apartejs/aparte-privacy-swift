@@ -38,7 +38,7 @@ public struct Span: Sendable, Hashable, CustomStringConvertible {
 /// The result of `Privacy.mask`: the masked text, and each placeholder's value (keep it on the device).
 public struct Masked: Sendable, Equatable {
     public let text: String
-    public let secrets: [String: String]
+    public let values: [String: String]
 }
 
 /// The detector: load a model file once, then scan as many texts as you like.
@@ -118,9 +118,9 @@ public final class Privacy: Sendable {
         let found = detect(text, minScore: minScore, ignore: ignore, ignorePatterns: ignorePatterns)
         var all: [(start: Int, end: Int, text: String, subtype: String)] =
             found.map { ($0.utf16Range.lowerBound, $0.utf16Range.upperBound, $0.text, $0.subtype) }
-        var values: [String] = []
-        for s in found where !values.contains(s.text) { values.append(s.text) }
-        for value in values {
+        var distincts: [String] = []
+        for s in found where !distincts.contains(s.text) { distincts.append(s.text) }
+        for value in distincts {
             let subtype = found.first { $0.text == value }!.subtype
             let v = Array(value.utf16)
             var i = indexOf(v, in: units, from: 0)
@@ -132,27 +132,27 @@ public final class Privacy: Sendable {
         }
         all.sort { $0.start < $1.start }
         var out = "", pos = 0, n = 0
-        var seen: [String: String] = [:], secrets: [String: String] = [:]
+        var seen: [String: String] = [:], values: [String: String] = [:]
         for s in all where s.start >= pos {
             let ph: String
             if let known = seen[s.text] { ph = known } else {
                 n += 1
                 ph = placeholder(s.subtype, n)
-                seen[s.text] = ph; secrets[ph] = s.text
+                seen[s.text] = ph; values[ph] = s.text
             }
             out += String(decoding: units[pos..<s.start], as: UTF16.self) + ph
             pos = s.end
         }
         out += String(decoding: units[pos...], as: UTF16.self)
-        return Masked(text: out, secrets: secrets)
+        return Masked(text: out, values: values)
     }
 
     /// Put the values back: the inverse of `mask` (e.g. on an AI's answer).
-    public func unmask(_ text: String, secrets: [String: String]) -> String {
+    public func unmask(_ text: String, values: [String: String]) -> String {
         var out = text
         // longest placeholder first, so that none replaces part of another
-        for ph in secrets.keys.sorted(by: { $0.count != $1.count ? $0.count > $1.count : $0 < $1 }) {
-            out = out.replacingOccurrences(of: ph, with: secrets[ph]!)
+        for ph in values.keys.sorted(by: { $0.count != $1.count ? $0.count > $1.count : $0 < $1 }) {
+            out = out.replacingOccurrences(of: ph, with: values[ph]!)
         }
         return out
     }

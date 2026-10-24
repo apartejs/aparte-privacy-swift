@@ -2,8 +2,8 @@
 // reference implementation (and of the JavaScript runtime), text by text: same
 // text, same subtype, score within 2e-4.
 //
-// The references hold secret-shaped strings, so they are not in this repository:
-// they are on Hugging Face (https://huggingface.co/apartejs/aparte-secrets/tree/main/references).
+// The references are synthetic texts with personal-data-shaped values, kept out of this
+// repository: they are on Hugging Face (https://huggingface.co/apartejs/aparte-privacy/tree/main).
 // Point APARTE_PRIVACY_REFS at a downloaded references_int8.jsonl; the test is
 // reported as skipped otherwise.
 //
@@ -29,7 +29,7 @@ final class ParityTests: XCTestCase {
         guard let path = ProcessInfo.processInfo.environment["APARTE_PRIVACY_REFS"] else {
             throw XCTSkip("set APARTE_PRIVACY_REFS to a references_int8.jsonl from Hugging Face")
         }
-        let secrets = try Privacy.load()
+        let privacy = try Privacy.load()
         let lines = try String(contentsOf: URL(fileURLWithPath: path), encoding: .utf8).split(whereSeparator: \.isNewline)
         var bad: [String] = [], n = 0
         let t0 = Date()
@@ -42,7 +42,7 @@ final class ParityTests: XCTestCase {
                 v.append(contentsOf: scalars[s.start..<s.end])
                 return (String(v), s.subtype, s.score)
             }
-            let mine = secrets.detect(r.text)
+            let mine = privacy.detect(r.text)
             let same = mine.count == ref.count && zip(mine, ref).allSatisfy {
                 $0.text == $1.0 && $0.subtype == $1.1 && abs($0.score - $1.2) <= 2e-4
             }

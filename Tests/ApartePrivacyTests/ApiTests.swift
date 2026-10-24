@@ -38,6 +38,14 @@ final class ApiTests: XCTestCase {
         XCTAssertEqual(privacy.detect(text, minScore: 1.01), [])
     }
 
+    func testMaskAndUnmaskRoundTrip() {
+        let text = "Appelle Jean Dupont au 06 12 34 56 78 ou écris à jean.dupont@gmail.com"
+        let masked = privacy.mask(text)
+        XCTAssertFalse(masked.text.contains("Jean Dupont") || masked.text.contains("06 12 34 56 78"), masked.text)
+        XCTAssertEqual(masked.values.count, 3)
+        XCTAssertEqual(privacy.unmask(masked.text, values: masked.values), text)
+    }
+
     func testRejectsAFileThatIsNotAModel() {
         XCTAssertThrowsError(try Privacy(data: Data("not a model".utf8)))
     }
