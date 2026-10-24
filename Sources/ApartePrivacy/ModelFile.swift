@@ -14,7 +14,7 @@ public enum PrivacyError: Error, CustomStringConvertible, Sendable {
     public var description: String {
         switch self {
         case .notAModelFile: return "not an aparte model file"
-        case .wrongTask(let t): return "not an aparte-secrets model (task \(t ?? "none"))"
+        case .wrongTask(let t): return "not an aparte-privacy model (task \(t ?? "none"))"
         case .unsupportedFormat(let f): return "model format \(f) is not supported by this runtime (format 1)"
         case .malformed(let why): return "malformed model file: \(why)"
         }
@@ -45,7 +45,8 @@ public struct ModelHeader: Decodable, Sendable {
     let byteIds: [Int]
     let tensors: [Tensor]
 
-    /// The kinds of secret the model tells apart: `password`, `api_key`, `token`, `private_key`, `other`.
+    /// The categories the model tells apart: `private_person`, `private_address`, `private_email`,
+    /// `private_phone`, `private_url`, `private_date`, `account_number`.
     public var subtypes: [String] { labels.subtypes }
 
     struct Labels: Decodable, Sendable {

@@ -18,8 +18,8 @@ final class ApiTests: XCTestCase {
     }
 
     func testFindsANameWithItsKindAndRange() throws {
-        let text = "Appelle Marie Lambert au 06 12 34 56 78 demain"
-        let s = try XCTUnwrap(privacy.detect(text).first { $0.text.contains("Lambert") }, "\(privacy.detect(text))")
+        let text = "My name is John Smith and my email is john.smith@gmail.com"
+        let s = try XCTUnwrap(privacy.detect(text).first { $0.text == "John Smith" }, "\(privacy.detect(text))")
         XCTAssertEqual(s.subtype, "private_person")
         XCTAssertEqual(String(text[s.range]), s.text)
         XCTAssertGreaterThan(s.score, 0)
@@ -32,7 +32,7 @@ final class ApiTests: XCTestCase {
     }
 
     func testIgnoreAndMinScoreAreAppliedAfterTheModel() throws {
-        let text = "Appelle Marie Lambert au 06 12 34 56 78 demain"
+        let text = "My name is John Smith and my email is john.smith@gmail.com"
         let value = try XCTUnwrap(privacy.detect(text).first { $0.subtype == "private_person" }).text
         XCTAssertFalse(privacy.detect(text, ignore: [value]).contains { $0.text == value })
         XCTAssertEqual(privacy.detect(text, minScore: 1.01), [])

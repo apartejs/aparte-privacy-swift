@@ -1,28 +1,31 @@
-// ApartePrivacy — finds passwords, API keys, tokens and private keys in text, on-device.
+// ApartePrivacy — finds personal data in text, on-device: names, addresses, emails,
+// phone numbers, URLs, dates and account numbers.
 //
-// Reads the `.bin` model files published at https://huggingface.co/apartejs/aparte-secrets
+// Reads the `.bin` model files published at https://huggingface.co/apartejs/aparte-privacy
 // (format 1); the int8 model is bundled. No dependency.
 //
 //     import ApartePrivacy
 //
-//     let secrets = try Privacy.load()
-//     secrets.detect("the wifi password is Sunflower77# for the guests")
-//     // [Span(text: "Sunflower77#", subtype: "password", score: …)]
+//     let privacy = try Privacy.load()
+//     privacy.detect("My name is John Smith and my email is john.smith@gmail.com")
+//     // [Span(11..<21, text: "John Smith", subtype: private_person, score: 0.9999),
+//     //  Span(38..<58, text: "john.smith@gmail.com", subtype: private_email, score: 0.9956)]
 //
-// It gives exactly the spans of the JavaScript runtime (@aparte/secrets on npm) and
+// It gives exactly the spans of the JavaScript runtime (@aparte/privacy on npm) and
 // of the Python reference implementation; the tests check it text by text.
 
 import Foundation
 
-/// A secret found in the text.
+/// A piece of personal data found in the text.
 public struct Span: Sendable, Hashable, CustomStringConvertible {
     /// Where it is in the text: `text[span.range] == span.text`.
     public let range: Range<String.Index>
     /// The same place as UTF-16 offsets, the `start` and `end` of the JavaScript and Kotlin runtimes.
     public let utf16Range: Range<Int>
-    /// The secret itself.
+    /// The value itself.
     public let text: String
-    /// `password`, `api_key`, `token`, `private_key` or `other`.
+    /// `private_person`, `private_address`, `private_email`, `private_phone`, `private_url`,
+    /// `private_date` or `account_number`.
     public let subtype: String
     /// The model's confidence, from 0 to 1.
     public let score: Double
@@ -82,7 +85,7 @@ public final class Privacy: Sendable {
         try self.init(data: try Data(contentsOf: url))
     }
 
-    /// Every secret found in the text, in text order. The model reports raw spans;
+    /// Every piece of personal data found in the text, in text order. The model reports raw spans;
     /// `minScore`, `ignore` (exact values) and `ignorePatterns` are the caller's
     /// policy, applied after it.
     public func detect(
@@ -100,7 +103,7 @@ public final class Privacy: Sendable {
         }
     }
 
-    /// Replace every secret with a placeholder (`[PASSWORD_1]`, `[API_KEY_2]`…),
+    /// Replace every value with a placeholder (`[PRIVATE_PERSON_1]`, `[PRIVATE_PHONE_2]`…),
     /// reversibly. A value found once is masked everywhere it appears: the model
     /// may only flag the occurrence whose context gives it away.
     public func mask(
