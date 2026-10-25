@@ -8,8 +8,8 @@
 //
 //     let privacy = try Privacy.load()
 //     privacy.detect("My name is John Smith and my email is john.smith@gmail.com")
-//     // [Span(11..<21, text: "John Smith", subtype: private_person, score: 0.9999),
-//     //  Span(38..<58, text: "john.smith@gmail.com", subtype: private_email, score: 0.9956)]
+//     // [Span(11..<21, text: "John Smith", subtype: private_person, score: 1.0),
+//     //  Span(38..<58, text: "john.smith@gmail.com", subtype: private_email, score: 1.0)]
 //
 // It gives exactly the spans of the JavaScript runtime (@aparte/privacy on npm) and
 // of the Python reference implementation; the tests check it text by text.
@@ -45,11 +45,11 @@ public struct Masked: Sendable, Equatable {
 /// It holds no mutable state and can be shared across threads.
 public final class Privacy: Sendable {
     /// The name of the bundled model file.
-    public static let modelFile = "privacy-v1-int8.bin"
+    public static let modelFile = "privacy-v1.1-int8.bin"
 
     /// Where the bundled model file is.
     public static var modelURL: URL? {
-        Bundle.module.url(forResource: "privacy-v1-int8", withExtension: "bin")
+        Bundle.module.url(forResource: "privacy-v1.1-int8", withExtension: "bin")
     }
 
     /// Load the bundled model (int8). Load it once and keep the `Privacy`:

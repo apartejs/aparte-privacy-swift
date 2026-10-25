@@ -11,7 +11,7 @@ final class ApiTests: XCTestCase {
 
     func testReadsTheModelHeader() {
         XCTAssertEqual(privacy.header.task, "privacy")
-        XCTAssertEqual(privacy.header.version, "1.0.0")
+        XCTAssertEqual(privacy.header.version, "1.1.0")
         XCTAssertEqual(privacy.header.precision, "int8")
         XCTAssertEqual(privacy.header.subtypes, ["private_person", "private_address", "private_email", "private_phone",
                                                  "private_url", "private_date", "account_number"])

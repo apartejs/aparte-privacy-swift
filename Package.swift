@@ -18,7 +18,7 @@ let package = Package(
     targets: [
         .target(
             name: "ApartePrivacy",
-            resources: [.copy("Resources/privacy-v1-int8.bin")]
+            resources: [.copy("Resources/privacy-v1.1-int8.bin")]
         ),
         .testTarget(name: "ApartePrivacyTests", dependencies: ["ApartePrivacy"]),
     ]
